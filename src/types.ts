@@ -16,6 +16,7 @@ export interface Notice {
   sections: { heading: string; body: string }[];
   advice: string[];
   attachment: string;
+  evidence?: { fileId: string; version: string; scope: string };
 }
 export interface Reply {
   id: string;
@@ -43,6 +44,7 @@ export interface Message {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  kind?: 'research-answer';
   files?: FileInfo[];
   references?: { label: string; href: string }[];
 }
@@ -51,6 +53,7 @@ export interface Conversation {
   title: string;
   updatedAt: string;
   messages: Message[];
+  matter?: import('./features/matter/model').ResearchMatter;
 }
 export interface Profile {
   name: string;
@@ -63,6 +66,7 @@ export interface DocumentRecord {
   name: string;
   tool: string;
   date: string;
+  matterChatId?: string;
 }
 export interface StoredState {
   version: 1;

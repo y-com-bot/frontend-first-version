@@ -16,6 +16,7 @@ import { notices } from '../data/content';
 import { schools } from '../types';
 import type { School } from '../types';
 import { Sheet } from '../components/Sheet';
+import { getPreparation, researchTitle } from '../features/matter/model';
 
 export function Mine() {
   const { state } = useStore();
@@ -48,6 +49,25 @@ export function Mine() {
           <small>个人资料</small>
         </Link>
       </div>
+      {state.conversations.some((chat) => chat.matter?.continued) && (
+        <section aria-label="正在准备的事项">
+          <div className="section-heading">
+            <h2>正在准备</h2>
+          </div>
+          {state.conversations
+            .filter((chat) => chat.matter?.continued)
+            .slice(0, 3)
+            .map((chat) => (
+              <RowLink
+                key={chat.id}
+                to={`/chat/${chat.id}#preparation`}
+                secondary={`已完成 ${getPreparation(chat.matter!).filter((t) => t.complete).length}/4 · 示例事项`}
+              >
+                {researchTitle}
+              </RowLink>
+            ))}
+        </section>
+      )}
       <div className="section-heading">
         <h2>最近的对话</h2>
         <Link to="/mine/history" className="text-button">
@@ -187,7 +207,11 @@ export function Documents() {
       {state.documents.map((doc) => (
         <RowLink
           key={doc.id}
-          to={`/agents/${doc.tool}?record=${doc.id}`}
+          to={
+            doc.matterChatId
+              ? `/agents/review?matter=${encodeURIComponent(doc.matterChatId)}`
+              : `/agents/${doc.tool}?record=${doc.id}`
+          }
           secondary={`${doc.tool === 'review' ? '文件审查' : '资料整理'} · ${formatDate(doc.date)}`}
         >
           {doc.name}

@@ -1,0 +1,80 @@
+import { expect, test } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+for (const mode of ['http', 'offline'] as const) {
+  test(`${mode}：依据、条件核对、材料复核与清单持久化`, async ({ page }) => {
+    const errors: string[] = [];
+    const remote: string[] = [];
+    page.on('pageerror', error => errors.push(error.message));
+    page.on('request', request => {
+      if (/^https?:/.test(request.url())) remote.push(request.url());
+    });
+    await page.goto(mode === 'http' ? '/' : pathToFileURL(resolve('standalone/校园助手-双击打开.html')).href);
+    await page.getByRole('button', { name: '校内科研项目，我可以申请吗？', exact: true }).click();
+    await page.getByRole('button', { name: '发送问题', exact: true }).click();
+    const checks = page.getByRole('region', { name: '条件核对', exact: true });
+    await expect(checks.locator('.check-status')).toHaveText(['待确认', '待确认', '待确认']);
+    await page.getByRole('button', { name: /\[1\] 本科生科研项目申报说明/ }).click();
+    await expect(page.getByRole('dialog')).toContainText('DEMO-KY-2026-01');
+    await expect(page.getByRole('dialog')).toContainText('或');
+    await page.getByRole('link', { name: '打开通知全文' }).click();
+    await expect(page.locator('.is-source-target')).toContainText('课程项目');
+    await page.getByRole('button', { name: '返回申请核对' }).click();
+    await page.getByRole('button', { name: '补充个人信息', exact: true }).click();
+    await page.getByRole('button', { name: '使用示例信息', exact: true }).click();
+    await expect(checks.locator('.check-status')).toHaveText(['已满足', '已满足', '已满足']);
+    await page.getByRole('button', { name: '生成准备清单', exact: true }).click();
+    await expect(page.getByRole('region', { name: '准备清单', exact: true })).toContainText('已完成 1/4');
+    await page.getByRole('link', { name: /完善项目计划书/ }).click();
+    await page.getByRole('button', { name: '使用示例计划书', exact: true }).click();
+    await page.getByRole('button', { name: '开始示例预审', exact: true }).click();
+    await expect(page.getByRole('heading', { name: '有两项内容需要完善' })).toBeVisible();
+    await page.getByRole('button', { name: '使用修改后的示例并复核' }).click();
+    await expect(page.getByRole('heading', { name: '示例材料的四项内容已齐全' })).toBeVisible();
+    await page.getByRole('link', { name: '返回准备清单', exact: true }).click();
+    await expect(page.getByRole('region', { name: '准备清单', exact: true })).toContainText('已完成 2/4');
+    await page.getByRole('checkbox', { name: '填写申请表', exact: true }).click();
+    await page.getByRole('checkbox', { name: '确认提交要求', exact: true }).click();
+    await expect(page.getByRole('region', { name: '准备清单', exact: true })).toContainText('已完成 4/4');
+    await page.reload();
+    await expect(page.getByRole('checkbox', { name: '填写申请表', exact: true })).toBeChecked();
+    const download = page.waitForEvent('download');
+    await page.getByRole('button', { name: '下载准备清单', exact: true }).click();
+    expect((await download).suggestedFilename()).toContain('科研项目准备清单');
+    await page.getByRole('link', { name: '我的', exact: true }).click();
+    await page.getByRole('region', { name: '正在准备的事项' }).getByRole('link').click();
+    await expect(page.getByRole('region', { name: '准备清单', exact: true })).toContainText('已完成 4/4');
+    expect(errors).toEqual([]);
+    if (mode === 'offline') expect(remote).toEqual([]);
+  });
+}
+
+test('未知、范围冲突与或条件：不从文件名推断申请资格', async ({ page }) => {
+  await page.goto('/');
+  await page.getByRole('textbox', { name: '向小X提问' }).fill('校内科研项目，我可以申请吗？');
+  await page.locator('input[type=file]').setInputFiles({ name: '本科生竞赛证明.txt', mimeType: 'text/plain', buffer: Buffer.from('测试文件，不用于判断资格') });
+  await page.getByRole('button', { name: '发送问题', exact: true }).click();
+  const checks = page.getByRole('region', { name: '条件核对', exact: true });
+  await expect(checks.locator('.check-status')).toHaveText(['待确认', '待确认', '待确认']);
+  await page.getByRole('button', { name: '补充个人信息', exact: true }).click();
+  await page.getByLabel('学校与年度').selectOption('conflict');
+  await page.getByLabel('在读情况').selectOption('undergraduate');
+  await page.getByLabel('相关经历').selectOption('competition');
+  await page.getByRole('button', { name: '更新核对结果', exact: true }).click();
+  await expect(checks.locator('.check-status')).toHaveText(['范围冲突', '已满足', '已满足']);
+  await expect(page.getByRole('button', { name: '先准备清单，保留当前判断' })).toBeDisabled();
+  await page.getByRole('button', { name: '重新核对信息', exact: true }).click();
+  await page.getByLabel('学校与年度').selectOption('matched');
+  await page.getByLabel('相关经历').selectOption('none');
+  await page.getByRole('button', { name: '更新核对结果', exact: true }).click();
+  await expect(checks.locator('.check-status')).toHaveText(['已满足', '已满足', '未满足']);
+  await page.getByRole('button', { name: '重新核对信息', exact: true }).click();
+  await page.getByLabel('相关经历').selectOption('competition');
+  await page.getByRole('button', { name: '更新核对结果', exact: true }).click();
+  await expect(checks.locator('.check-status')).toHaveText(['已满足', '已满足', '已满足']);
+  await page.getByRole('textbox', { name: '向小X提问' }).fill('什么时候截止？');
+  await page.getByRole('button', { name: '发送问题', exact: true }).click();
+  await expect(page.locator('.message.assistant').last()).toContainText('目前无法确认');
+  await expect(page.getByRole('region', { name: '科研申请核对', exact: true })).toHaveCount(1);
+});

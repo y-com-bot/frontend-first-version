@@ -15,12 +15,34 @@ import { Back, Empty, PageTitle } from '../components/Common';
 import { downloadText } from '../utils';
 import { useStore } from '../state/context';
 import type { FileInfo } from '../types';
+import { ResearchReview } from '../features/matter/ResearchReview';
+import { getPreparation, researchTitle } from '../features/matter/model';
 
 export function Agents() {
+  const { state } = useStore();
+  const current = state.conversations.find(
+    (chat) => chat.matter?.continued && chat.matter.plan !== 'revised',
+  );
   return (
     <div className="agents-page page-enter">
       <PageTitle eyebrow="专门的工具，处理具体的问题">校园工具箱</PageTitle>
       <p className="page-intro">让材料更清楚，让准备更从容。</p>
+      {current && (
+        <Link
+          className="matter-resume"
+          to={`/agents/review?matter=${encodeURIComponent(current.id)}`}
+        >
+          <FileText size={17} />
+          <span>
+            <strong>继续项目计划书预审</strong>
+            <small>
+              {researchTitle} · 已完成{' '}
+              {getPreparation(current.matter!).filter((t) => t.complete).length}/4
+            </small>
+          </span>
+          <ArrowUpRight size={15} />
+        </Link>
+      )}
       <Link className="tool-card" to="/agents/review">
         <div className="tool-card-top">
           <span className="tool-icon">
@@ -93,6 +115,17 @@ const organizeResults = [
 ];
 
 export function ToolWorkspace() {
+  const [params] = useSearchParams();
+  const { tool } = useParams();
+  const matter = params.get('matter');
+  return matter && tool === 'review' ? (
+    <ResearchReview key={matter} chatId={matter} />
+  ) : (
+    <GeneralToolWorkspace />
+  );
+}
+
+function GeneralToolWorkspace() {
   const { tool } = useParams();
   const [params] = useSearchParams();
   const { state, addDocument, notify } = useStore();

@@ -1,4 +1,5 @@
-import { Link, useParams } from 'react-router-dom';
+import { useEffect } from 'react';
+import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 import { Download, Sparkles } from 'lucide-react';
 import { notices } from '../data/content';
 import { Back, BookmarkButton, Empty } from '../components/Common';
@@ -9,8 +10,17 @@ import { useStore } from '../state/context';
 export function NoticeDetail() {
   const { id } = useParams();
   const notice = notices.find((item) => item.id === id);
-  const { showAdvice } = useShell();
-  const { notify } = useStore();
+  const { showAdvice, suggest } = useShell();
+  const { notify, state } = useStore();
+  const location = useLocation();
+  const [params] = useSearchParams();
+  const from = state.conversations.find((chat) => chat.id === params.get('from') && chat.matter);
+  useEffect(() => {
+    if (/^#section-\d+$/.test(location.hash))
+      document
+        .getElementById(location.hash.slice(1))
+        ?.scrollIntoView({ block: 'start', behavior: 'instant' });
+  }, [location.hash, notice?.id]);
   if (!notice)
     return (
       <Empty
@@ -27,7 +37,10 @@ export function NoticeDetail() {
   return (
     <article className="detail-page page-enter">
       <div className="detail-top">
-        <Back to="/plaza?tab=notices" label="校园通知" />
+        <Back
+          to={from ? `/chat/${from.id}#evidence` : '/plaza?tab=notices'}
+          label={from ? '返回申请核对' : '校园通知'}
+        />
         <BookmarkButton itemKey={`notice:${notice.id}`} />
       </div>
       <p className="meta">
@@ -39,6 +52,13 @@ export function NoticeDetail() {
           <span key={tag}>{tag}</span>
         ))}
       </div>
+      {notice.evidence && (
+        <div className="document-context">
+          <p>示例文件 · v{notice.evidence.version}</p>
+          <p>适用范围：{notice.evidence.scope}</p>
+          <small>{notice.evidence.fileId}</small>
+        </div>
+      )}
       <section className="summary-panel">
         <span className="ai-label">
           <Sparkles size={15} />
@@ -47,8 +67,12 @@ export function NoticeDetail() {
         <p>{notice.summary}</p>
       </section>
       <div className="article-body">
-        {notice.sections.map((section) => (
-          <section key={section.heading}>
+        {notice.sections.map((section, index) => (
+          <section
+            key={section.heading}
+            id={`section-${index}`}
+            className={location.hash === `#section-${index}` ? 'is-source-target' : ''}
+          >
             <h2>{section.heading}</h2>
             <p>{section.body}</p>
           </section>
@@ -74,10 +98,12 @@ export function NoticeDetail() {
       <button
         type="button"
         className="primary-button full-width"
-        onClick={() => showAdvice(notice)}
+        onClick={() =>
+          notice.id === 'research' ? suggest('校内科研项目，我可以申请吗？') : showAdvice(notice)
+        }
       >
         <Sparkles size={17} />
-        查看小X 建议
+        {notice.id === 'research' ? '让小X核对申请条件' : '查看小X 建议'}
       </button>
       <p className="demo-note">示例通知，不作为真实校园办事依据。</p>
     </article>

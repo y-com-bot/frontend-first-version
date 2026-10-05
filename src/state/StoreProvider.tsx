@@ -12,6 +12,14 @@ import type {
 } from '../types';
 import { schools } from '../types';
 import { StoreContext } from './context';
+import {
+  isResearchMatter,
+  isResearchQuestion,
+  isResearchFollowup,
+  newResearchMatter,
+  researchAnswer,
+} from '../features/matter/model';
+import type { ResearchMatter } from '../features/matter/model';
 
 const STORAGE_KEY = 'campus-prototype-v1';
 const now = () => new Date().toISOString();
@@ -95,15 +103,24 @@ function readStorage(): StoredState {
       ...restored,
       conversations: restored.conversations.map((chat) => {
         const last = chat.messages.at(-1);
+        const matter = isResearchMatter(chat.matter) ? chat.matter : undefined;
+        const research =
+          last &&
+          (isResearchQuestion(last.text) || Boolean(matter && isResearchFollowup(last.text)));
         return last?.role === 'user'
           ? {
               ...chat,
+              matter: matter ?? (research ? newResearchMatter() : undefined),
               messages: [
                 ...chat.messages,
-                { id: id(), role: 'assistant', ...createAnswer(last.text) },
+                {
+                  id: id(),
+                  role: 'assistant',
+                  ...(research ? researchAnswer(last.text) : createAnswer(last.text)),
+                },
               ],
             }
-          : chat;
+          : { ...chat, matter };
       }),
     };
   } catch {
@@ -116,7 +133,8 @@ type Action =
   | { type: 'profile'; profile: Profile }
   | { type: 'bookmark'; key: string }
   | { type: 'like'; id: string }
-  | { type: 'message'; chatId: string; message: Message; title: string }
+  | { type: 'message'; chatId: string; message: Message; title: string; matter?: ResearchMatter }
+  | { type: 'matter'; chatId: string; patch: Partial<ResearchMatter> }
   | { type: 'thread'; thread: Thread }
   | { type: 'reply'; threadId: string; content: string; profile: Profile }
   | { type: 'document'; document: DocumentRecord }
@@ -137,13 +155,33 @@ function reducer(state: StoredState, action: Action): StoredState {
     case 'message': {
       const existing = state.conversations.find((x) => x.id === action.chatId);
       const chat = existing
-        ? { ...existing, updatedAt: now(), messages: [...existing.messages, action.message] }
-        : { id: action.chatId, title: action.title, updatedAt: now(), messages: [action.message] };
+        ? {
+            ...existing,
+            matter: existing.matter ?? action.matter,
+            updatedAt: now(),
+            messages: [...existing.messages, action.message],
+          }
+        : {
+            id: action.chatId,
+            title: action.title,
+            updatedAt: now(),
+            messages: [action.message],
+            matter: action.matter,
+          };
       return {
         ...state,
         conversations: [chat, ...state.conversations.filter((x) => x.id !== chat.id)],
       };
     }
+    case 'matter':
+      return {
+        ...state,
+        conversations: state.conversations.map((chat) => {
+          if (chat.id !== action.chatId || !chat.matter) return chat;
+          const matter = { ...chat.matter, ...action.patch };
+          return isResearchMatter(matter) ? { ...chat, matter, updatedAt: now() } : chat;
+        }),
+      };
     case 'thread':
       return { ...state, threads: [action.thread, ...state.threads] };
     case 'reply':
@@ -204,23 +242,35 @@ export function StoreProvider({ children }: { children: ReactNode }) {
   };
   const sendMessage = (question: string, chatId?: string, files: FileInfo[] = []) => {
     const key = chatId || id();
+    const current = state.conversations.find((chat) => chat.id === key)?.matter;
+    const research =
+      isResearchQuestion(question) || Boolean(current && isResearchFollowup(question));
+    const matter = current ?? (research ? newResearchMatter() : undefined);
     dispatch({
       type: 'message',
       chatId: key,
       title: question.slice(0, 35),
+      matter,
       message: { id: id(), role: 'user', text: question, files },
     });
     replyTimers.current.set(
       key,
-      setTimeout(() => {
-        dispatch({
-          type: 'message',
-          chatId: key,
-          title: question.slice(0, 35),
-          message: { id: id(), role: 'assistant', ...createAnswer(question) },
-        });
-        replyTimers.current.delete(key);
-      }, 650),
+      setTimeout(
+        () => {
+          dispatch({
+            type: 'message',
+            chatId: key,
+            title: question.slice(0, 35),
+            message: {
+              id: id(),
+              role: 'assistant',
+              ...(research ? researchAnswer(question) : createAnswer(question)),
+            },
+          });
+          replyTimers.current.delete(key);
+        },
+        research ? 1100 : 650,
+      ),
     );
     return key;
   };
@@ -241,6 +291,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         notify,
         storageAvailable,
         sendMessage,
+        updateMatter: (chatId, patch) => dispatch({ type: 'matter', chatId, patch }),
         addThread,
         setSchool: (school) => dispatch({ type: 'school', school }),
         saveProfile: (profile) => {

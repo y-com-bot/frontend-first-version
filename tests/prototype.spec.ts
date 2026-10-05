@@ -82,7 +82,7 @@ test('通知搜索、筛选、收藏、下载与建议', async ({ page }) => {
   await page.goto('/plaza');
   await page.locator('.school-button').click();
   await page.getByRole('dialog').getByRole('button', { name: '云川大学', exact: true }).click();
-  await expect(page.locator('.content-row')).toHaveCount(2);
+  await expect(page.locator('.content-row')).toHaveCount(3);
   await page.locator('.topic-filters').getByRole('button', { name: '实习', exact: true }).click();
   await expect(page.getByRole('heading', { name: '还没有找到相关内容' })).toBeVisible();
 });

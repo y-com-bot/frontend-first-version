@@ -1,5 +1,6 @@
 import { createContext, useContext } from 'react';
 import type { StoredState, Profile, School, FileInfo, Thread, DocumentRecord } from '../types';
+import type { ResearchMatter } from '../features/matter/model';
 
 export interface AppStore {
   state: StoredState;
@@ -8,6 +9,7 @@ export interface AppStore {
   toggleBookmark: (key: string) => void;
   toggleLike: (id: string) => void;
   sendMessage: (question: string, chatId?: string, files?: FileInfo[]) => string;
+  updateMatter: (chatId: string, patch: Partial<ResearchMatter>) => void;
   addThread: (thread: Pick<Thread, 'title' | 'content' | 'category' | 'school'>) => string;
   addReply: (threadId: string, content: string) => void;
   addDocument: (doc: Omit<DocumentRecord, 'id' | 'date'>) => void;

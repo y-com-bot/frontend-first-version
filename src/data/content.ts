@@ -1,12 +1,15 @@
 import type { Notice, Thread } from '../types';
+import { researchNotice } from '../features/matter/data';
+import { researchQuestion } from '../features/matter/model';
 
 export const suggestedQuestions = [
+  researchQuestion,
   '保研和考研，应该如何选择？',
   '第一次找实习，需要准备什么？',
-  '去哪里找课程复习资料？',
 ];
 
 export const notices: Notice[] = [
+  researchNotice,
   {
     id: 'course',
     title: '关于新学期选课与课程调整的说明',
