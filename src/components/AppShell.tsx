@@ -1,13 +1,5 @@
 import { useRef, useState } from 'react';
-import {
-  Blocks,
-  ChevronDown,
-  Check,
-  MessagesSquare,
-  Plus,
-  Sparkles,
-  UserRound,
-} from 'lucide-react';
+import { Blocks, ChevronDown, Check, MessagesSquare, Plus, UserRound } from 'lucide-react';
 import { Link, NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useViewport } from '../hooks/useViewport';
 import type { ShellContext } from '../hooks/useShell';
@@ -16,10 +8,11 @@ import { schools } from '../types';
 import { useStore } from '../state/context';
 import { Composer } from './Composer';
 import { Sheet } from './Sheet';
+import { BrandMark } from './BrandMark';
 
 const tabs = [
   { to: '/mine', label: '我的', icon: UserRound },
-  { to: '/', label: '小X', icon: Sparkles },
+  { to: '/', label: '小X', icon: BrandMark },
   { to: '/plaza', label: '广场', icon: MessagesSquare },
   { to: '/agents', label: '智能体', icon: Blocks },
 ];
@@ -72,7 +65,7 @@ export function AppShell() {
     <div className="desktop-stage">
       <aside className="desktop-caption" aria-label="原型说明">
         <span className="desktop-mark">
-          <Sparkles size={23} />
+          <BrandMark size={28} />
         </span>
         <p>
           一点疑问，
@@ -86,7 +79,7 @@ export function AppShell() {
         <header className="app-header">
           <NavLink to="/" className="brand" aria-label="小X校园助手首页">
             <span className="brand-symbol">
-              <Sparkles size={16} />
+              <BrandMark size={23} />
             </span>
             <span>
               小X <span className="brand-divider">·</span> 校园助手

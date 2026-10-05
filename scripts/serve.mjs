@@ -3,6 +3,7 @@ import { createServer } from 'node:http';
 import { readFile, stat } from 'node:fs/promises';
 import { extname, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { spawn } from 'node:child_process';
 
 const root = fileURLToPath(new URL('../dist/', import.meta.url));
 const port = Number(process.env.PORT || 4300);
@@ -61,11 +62,27 @@ const server = createServer(async (request, response) => {
     response.writeHead(400).end();
   }
 });
+let retried = false;
 server.on('error', (error) => {
+  if (error.code === 'EADDRINUSE' && !process.env.PORT && !retried) {
+    retried = true;
+    console.log(`Port ${port} is occupied. Choosing an available port...`);
+    server.listen(0, host);
+    return;
+  }
   console.error(`Preview could not start: ${error.message}`);
   process.exitCode = 1;
 });
-server.listen(port, host, () => {
-  console.log(`Campus prototype: http://${host}:${port}`);
+server.on('listening', () => {
+  const address = server.address();
+  const url = `http://${host}:${address.port}`;
+  console.log(`Campus prototype is running: ${url}`);
   console.log('Keep this window open. Press Ctrl+C to stop.');
+  if (process.argv.includes('--open')) {
+    const opener = process.platform === 'win32'
+      ? spawn('rundll32.exe', ['url.dll,FileProtocolHandler', url], { windowsHide: true })
+      : spawn(process.platform === 'darwin' ? 'open' : 'xdg-open', [url]);
+    opener.on('error', () => console.log(`Open this address in your browser: ${url}`));
+  }
 });
+server.listen(port, host);

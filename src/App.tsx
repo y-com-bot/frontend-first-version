@@ -1,4 +1,4 @@
-import { BrowserRouter, Link, Route, Routes } from 'react-router-dom';
+import { BrowserRouter, HashRouter, Link, Route, Routes } from 'react-router-dom';
 import { StoreProvider } from './state/StoreProvider';
 import { AppShell } from './components/AppShell';
 import { Empty } from './components/Common';
@@ -11,8 +11,9 @@ import { Agents, ToolWorkspace } from './pages/Agents';
 import { Bookmarks, Documents, History, Mine, Settings } from './pages/Mine';
 
 export function App() {
+  const Router = window.location.protocol === 'file:' ? HashRouter : BrowserRouter;
   return (
-    <BrowserRouter>
+    <Router>
       <StoreProvider>
         <Routes>
           <Route element={<AppShell />}>
@@ -47,6 +48,6 @@ export function App() {
           </Route>
         </Routes>
       </StoreProvider>
-    </BrowserRouter>
+    </Router>
   );
 }

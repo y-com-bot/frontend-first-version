@@ -18,36 +18,44 @@ import type { FileInfo } from '../types';
 
 export function Agents() {
   return (
-    <div className="page-enter">
-      <PageTitle eyebrow="专门的工具，处理具体的问题">你的校园工具箱</PageTitle>
+    <div className="agents-page page-enter">
+      <PageTitle eyebrow="专门的工具，处理具体的问题">校园工具箱</PageTitle>
       <p className="page-intro">让材料更清楚，让准备更从容。</p>
       <Link className="tool-card" to="/agents/review">
         <div className="tool-card-top">
           <span className="tool-icon">
-            <FileCheck2 size={24} />
+            <FileCheck2 size={23} />
           </span>
-          <span className="tool-label">材料助手</span>
+          <div className="tool-heading">
+            <span className="tool-label">材料助手</span>
+            <h2>文件审查</h2>
+          </div>
+          <ArrowUpRight size={18} className="tool-arrow" />
         </div>
-        <h2>文件审查</h2>
-        <p>检查材料的完整性、表达与格式，整理值得修改的地方。</p>
-        <span className="tool-link">
-          进入工具
-          <ArrowUpRight size={17} />
-        </span>
+        <p>提交之前，检查完整性、表达与格式。</p>
+        <div className="tool-output">
+          <span>适合简历与申请材料</span>
+          <span>修改建议清单</span>
+        </div>
+        <span className="tool-format">PDF · Word · TXT · Markdown</span>
       </Link>
       <Link className="tool-card" to="/agents/organize">
         <div className="tool-card-top">
           <span className="tool-icon">
-            <BookOpen size={24} />
+            <BookOpen size={23} />
           </span>
-          <span className="tool-label">学习助手</span>
+          <div className="tool-heading">
+            <span className="tool-label">学习助手</span>
+            <h2>资料整理</h2>
+          </div>
+          <ArrowUpRight size={18} className="tool-arrow" />
         </div>
-        <h2>资料整理</h2>
-        <p>把零散内容整理成要点与阅读清单，找到下一步的学习方向。</p>
-        <span className="tool-link">
-          进入工具
-          <ArrowUpRight size={17} />
-        </span>
+        <p>把零散资料，整理成清晰的阅读路径。</p>
+        <div className="tool-output">
+          <span>适合课程笔记与文档</span>
+          <span>要点与阅读清单</span>
+        </div>
+        <span className="tool-format">PDF · Word · TXT · Markdown</span>
       </Link>
       <p className="demo-note">当前工具展示操作流程与示例结果。</p>
     </div>

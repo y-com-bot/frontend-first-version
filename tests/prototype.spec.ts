@@ -1,4 +1,35 @@
 import { expect, test } from '@playwright/test';
+import { resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
+
+test('双击 HTML 离线预览：导航、刷新、聊天和下载不依赖网络', async ({ page }) => {
+  const errors: string[] = [];
+  const remoteRequests: string[] = [];
+  page.on('pageerror', error => errors.push(error.message));
+  page.on('request', request => {
+    if (/^https?:/.test(request.url())) remoteRequests.push(request.url());
+  });
+  const fileUrl = pathToFileURL(resolve('standalone/校园助手-双击打开.html')).href;
+  await page.goto(fileUrl);
+  await expect(page.getByRole('heading', { name: '今天有什么 想问的？' })).toBeVisible();
+  await page.getByRole('link', { name: '广场', exact: true }).click();
+  await expect(page).toHaveURL(/#\/plaza$/);
+  await page.getByRole('searchbox', { name: '搜索通知与校园信息' }).fill('奖学金');
+  await page.locator('.content-row').click();
+  await page.reload();
+  await expect(page.getByRole('heading', { name: /奖学金申请/ })).toBeVisible();
+  const download = page.waitForEvent('download');
+  await page.locator('.download-row').click();
+  expect((await download).suggestedFilename()).toContain('奖学金');
+  await page.getByRole('link', { name: '小X', exact: true }).click();
+  await page.getByRole('textbox', { name: '向小X提问' }).fill('如何准备实习？');
+  await page.getByRole('button', { name: '发送问题', exact: true }).click();
+  await expect(page.locator('.message.assistant')).toBeVisible();
+  await page.reload();
+  await expect(page.locator('.message.user')).toContainText('如何准备实习？');
+  expect(errors).toEqual([]);
+  expect(remoteRequests).toEqual([]);
+});
 
 test('首页、推荐填入、发送与对话持久化', async ({ page }) => {
   const errors: string[] = [];

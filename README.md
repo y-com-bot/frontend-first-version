@@ -4,7 +4,13 @@
 
 ![首页预览](docs/home-preview.png)
 
-下一轮视觉提案见 [界面审阅](docs/UI-REVIEW.md)，尚未实施。
+第二版的视觉改动与截图见 [界面审阅](docs/UI-REVIEW.md)。
+
+## 只想直接体验
+
+下载最新预览包并解压，双击 **校园助手-双击打开.html**，即可在浏览器中体验。这个版本无需安装 Node.js、启动服务或连接网络；Windows、macOS、Linux 都可以用浏览器打开。
+
+Windows 用户也可以双击 `start-preview.cmd`，它会优先打开这个离线页面。
 
 ## 启动
 
@@ -23,7 +29,9 @@ npm run dev
 
 分享包有两种用途：源码包适合继续开发；预览包包含已构建页面，适合直接体验。
 
-预览包解压后，在安装了 Node.js 的电脑上双击 `start-preview.cmd`，保持窗口打开，再访问 http://127.0.0.1:4300 。macOS / Linux 用户可在解压目录执行 `node scripts/serve.mjs`。预览包不需要安装项目依赖。
+预览包包含双击打开的独立 HTML，以及用于网站部署的 `dist`。单独发送这个 HTML 文件给别人，也可以直接体验。
+
+如需通过本地 HTTP 地址预览：安装 Node.js，在预览包目录执行 `node scripts/serve.mjs`。Windows 用户可执行 `start-preview.cmd --server`，服务就绪后会打开浏览器。默认地址为 http://127.0.0.1:4300；若端口被占用，会选择空闲端口，以窗口实际输出的地址为准。保持服务窗口运行。
 
 从源码启动生产预览：
 
@@ -33,7 +41,13 @@ npm run build
 npm run share
 ```
 
-不能直接双击 `dist/index.html` 预览。页面需要通过 HTTP 服务加载；分享 `localhost` 地址也不能让别人从自己的电脑访问。若希望别人点击链接即可体验，需要另外部署到静态网站托管服务。
+`npm run build` 同时生成 `dist` 和 `standalone/校园助手-双击打开.html`。`dist/index.html` 是部署入口，需要 HTTP 服务；双击体验时请使用独立 HTML。HTTP 版本使用普通页面路径，文件版本使用 `#/...` 导航，以支持详情页刷新。
+
+`localhost` / `127.0.0.1` 仅指向访问者自己的电脑，不能作为公网链接发给别人。若希望别人点击链接即可体验，需要另外部署网站。
+
+### 如果浏览器提示拒绝连接
+
+这通常表示该地址上没有运行中的服务。确认窗口中出现 `Campus prototype is running: ...`，并使用它输出的完整地址。停留在错误提示或“请按任意键继续”的窗口，表示服务已经停止；请按提示处理，或直接使用独立 HTML。
 
 当前构建按网站根目录部署，资源路径为 `/assets/...`。托管时需将未知页面路径回退到 `/index.html`，真实缺失的资源应返回 404。仅上传 GitHub 仓库不会自动发布网站；GitHub Pages 的仓库子路径部署需要额外配置资源路径与路由。
 
@@ -42,7 +56,7 @@ npm run check
 npm run test:e2e
 ```
 
-`check` 检查代码规范、严格 TypeScript 类型并生成生产构建；`test:e2e` 使用本机 Microsoft Edge 验证主要操作、持久化和模拟视口变化，无需下载额外浏览器。生产构建保存在 `dist`；托管时需将未知路径回退到 `index.html`，以支持直接访问详情页。
+`check` 检查代码规范、严格 TypeScript 类型并生成两种构建；`test:e2e` 使用本机 Microsoft Edge 验证主要操作、持久化、模拟视口变化与文件模式下的离线导航、聊天和下载，无需下载额外浏览器。运行测试前先构建。
 
 ## 页面与流程
 
@@ -55,7 +69,7 @@ npm run test:e2e
 
 ## 技术与结构
 
-React + TypeScript（严格模式）+ Vite + React Router。Lucide 图标在本地打包；字体有系统字体回退。
+React + TypeScript（严格模式）+ Vite + React Router。脚本、样式和 Lucide 图标均在本地打包；使用系统字体，不依赖外部字体服务。
 
 - `src/components`：应用外壳、输入框、弹出面板和公共界面组件。
 - `src/pages`：页面及具体交互。
@@ -63,6 +77,8 @@ React + TypeScript（严格模式）+ Vite + React Router。Lucide 图标在本�
 - `src/state`：类型明确的本地状态与浏览器存储。
 - `src/hooks`：视口、软键盘尺寸和页面共用状态。
 - `src/styles.css`：颜色、间距和界面规则。
+- `scripts/build-standalone.mjs`：生成包含全部样式与脚本的独立 HTML。
+- `scripts/serve.mjs`：本地 HTTP 预览，包含页面回退与端口占用处理。
 
 ## 演示边界
 

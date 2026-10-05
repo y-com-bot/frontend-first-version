@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import { ArrowUpRight, MessageCircle, SlidersHorizontal, Sparkles, SquarePen } from 'lucide-react';
+import { ArrowUpRight, ChevronDown, MessageCircle, Sparkles, SquarePen } from 'lucide-react';
 import { notices } from '../data/content';
 import { useStore } from '../state/context';
 import { topics } from '../types';
@@ -23,8 +23,8 @@ export function Plaza() {
   const filteredNotices = notices.filter((item) => matches(item, item.excerpt));
   const filteredThreads = state.threads.filter((item) => matches(item, item.content));
   return (
-    <div className="page-enter">
-      <PageTitle eyebrow="信息与交流，都在这里">校园广场</PageTitle>
+    <div className="plaza-page page-enter">
+      <PageTitle>校园广场</PageTitle>
       <div className="segments" role="tablist" aria-label="广场内容">
         <button
           type="button"
@@ -68,10 +68,7 @@ export function Plaza() {
         ))}
       </div>
       <div className="list-context">
-        <span>
-          <SlidersHorizontal size={13} />
-          {state.selectedSchool}
-        </span>
+        <span>{tab === 'notices' ? '校园最新消息' : '同学们正在聊'}</span>
         <span>
           {tab === 'notices' ? filteredNotices.length : filteredThreads.length} 条
           {tab === 'notices' ? '通知' : '讨论'}
@@ -83,8 +80,12 @@ export function Plaza() {
         aria-labelledby={tab === 'notices' ? 'notices-tab' : 'forum-tab'}
       >
         {tab === 'notices' ? (
-          filteredNotices.map((notice) => (
-            <Link className="content-row" key={notice.id} to={`/notice/${notice.id}`}>
+          filteredNotices.map((notice, index) => (
+            <Link
+              className={`content-row notice-row ${index === 0 ? 'notice-lead' : ''}`}
+              key={notice.id}
+              to={`/notice/${notice.id}`}
+            >
               <p className="meta">
                 {notice.school} · {notice.source}
               </p>
@@ -94,36 +95,45 @@ export function Plaza() {
                 <span>
                   {formatDate(notice.date)} · {notice.category}
                 </span>
-                <span className="ai-label">
-                  <Sparkles size={12} />
-                  AI 概要
-                </span>
+                <span className="ai-label">AI 概要</span>
               </div>
             </Link>
           ))
         ) : (
           <>
             {!search && topic === '全部' && (
-              <div className="topic-summary">
-                <span className="ai-label">
-                  <Sparkles size={14} />
-                  小X 话题速览
-                </span>
+              <details className="topic-summary">
+                <summary>
+                  <span className="ai-label">
+                    <Sparkles size={14} />
+                    小X 话题速览
+                  </span>
+                  <span className="summary-topics">实习 · 资料 · 升学</span>
+                  <ChevronDown size={14} />
+                </summary>
                 <p>实习怎么开始、资料怎么整理、升学怎么选择——看看同学们正在聊什么。</p>
-              </div>
+              </details>
             )}
             {filteredThreads.map((thread) => (
-              <Link className="content-row" to={`/thread/${thread.id}`} key={thread.id}>
-                <p className="meta">
-                  {thread.school} · {thread.category}
-                </p>
+              <Link className="content-row thread-row" to={`/thread/${thread.id}`} key={thread.id}>
+                <div className="thread-person">
+                  <span className="author-avatar" aria-hidden="true">
+                    {thread.author.slice(0, 1)}
+                  </span>
+                  <div>
+                    <span className="author-name">{thread.author}</span>
+                    <p className="meta">
+                      {thread.school} · {thread.category}
+                    </p>
+                  </div>
+                </div>
                 <h2>{thread.title}</h2>
                 <p className="excerpt">
                   {thread.content.slice(0, 62)}
                   {thread.content.length > 62 ? '…' : ''}
                 </p>
                 <div className="row-bottom">
-                  <span>{thread.author}</span>
+                  <span>{formatDate(thread.date)}</span>
                   <span>
                     <MessageCircle size={13} />
                     {thread.replies.length} 条回复
