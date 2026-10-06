@@ -35,7 +35,7 @@ export function ResearchReview({ chatId }: { chatId: string }) {
     <div className="research-review page-enter">
       <Back to={`/chat/${chatId}#preparation`} label="返回申请核对" />
       <PageTitle eyebrow="与当前事项关联的材料辅助">项目计划书预审</PageTitle>
-      <p className="page-intro">依据附件 A，检查材料是否齐全。</p>
+      <p className="page-intro">对照附件 A，逐项查看研究目标、实施安排、成员分工与老师确认记录。</p>
       {phase === 'input' ? (
         <>
           <div className="upload-zone">
@@ -87,7 +87,7 @@ export function ResearchReview({ chatId }: { chatId: string }) {
           <p className="demo-note">本情景仅使用预设材料，展示检查与修改流程。</p>
         </>
       ) : phase === 'loading' ? (
-        <EvidenceProgress />
+        <EvidenceProgress mode="review" />
       ) : (
         <>
           <div className={`review-summary ${revised ? 'met' : 'unknown'}`} role="status">

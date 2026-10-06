@@ -1,12 +1,18 @@
 import type { School } from '../../types';
 import { recommendationCandidates } from './data';
 import type { RecommendationCandidate } from './data';
-import { goalLabels, growthLabels } from './model';
+import { goalLabels } from './model';
 import type { RecommendationContext, RecommendationSettings } from './model';
 
 export interface Recommendation extends RecommendationCandidate {
   reason: string;
 }
+const growthReasons = {
+  projects: '针对你提到的项目经历情况，可以从小项目开始，积累项目经历。',
+  resume: '针对你提到的简历表达问题，可以先把经历整理成具体的行动和成果。',
+  organization: '针对你提到的资料整理问题，可以先按课程和章节建立目录。',
+  direction: '针对你提到的方向选择问题，可以先比较近期想尝试的几条路径。',
+};
 export function selectRecommendations(
   context: RecommendationContext,
   settings: RecommendationSettings,
@@ -38,7 +44,7 @@ export function selectRecommendations(
           item.kind === 'discussion' && goalMatch
             ? `与你关注的「${goalLabels[goal!]}」相关，可以看看同学的准备经验。`
             : growthMatch
-              ? `你提到想${growthLabels[growth!]}，这条内容可以作为准备参考。`
+              ? growthReasons[growth!]
               : goalMatch
                 ? `与你最近${context.goal?.explicit ? '的目标' : '关注的方向'}「${goalLabels[goal!]}」相关。`
                 : item.kind === 'discussion'

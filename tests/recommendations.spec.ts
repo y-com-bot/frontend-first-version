@@ -47,6 +47,14 @@ for (const mode of ['http', 'offline'] as const) {
     await expect(page.getByRole('dialog')).toContainText('还没有可用的对话依据');
     await page.getByRole('button', { name: '关闭', exact: true }).click();
     await expect(region).toContainText('先看看这些方向');
+    await page.reload();
+    await region.getByRole('button', { name: '推荐依据', exact: true }).click();
+    await expect(page.getByRole('dialog')).toContainText('还没有可用的对话依据');
+    await page.getByRole('button', { name: '恢复被忽略的依据', exact: true }).click();
+    await expect(page.getByRole('dialog')).toContainText('实习准备');
+    await expect(page.getByRole('dialog')).toContainText('积累项目经历');
+    await page.getByRole('button', { name: '关闭', exact: true }).click();
+    await expect(region).toContainText('从课程项目到作品集');
     expect(errors).toEqual([]);
     if (mode === 'offline') expect(requests).toEqual([]);
   });
@@ -92,8 +100,9 @@ test('不从第三人称或附件推断；新目标、已改善信息与学校�
   await expect(page.locator('.message.assistant')).toHaveCount(2);
   await page.getByRole('link', { name: '小X', exact: true }).click();
   await expect(region).toContainText('学习提升');
-  await expect(region).toContainText('整理学习资料');
+  await expect(region).toContainText('把课件、笔记与习题整理成一份复习地图');
   await region.getByRole('button', { name: '推荐依据', exact: true }).click();
+  await expect(page.getByRole('dialog')).toContainText('整理学习资料');
   await expect(page.getByRole('dialog')).not.toContainText('积累项目经历');
   await page.getByRole('button', { name: '关闭', exact: true }).click();
   await input.fill('我是南湖理工大学的学生，想了解科研项目申请。');

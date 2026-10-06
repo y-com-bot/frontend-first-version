@@ -107,7 +107,8 @@ export function HomeRecommendations() {
       </div>
       {!items.length && (
         <p className="recommendation-empty">
-          暂时没有更多相关内容。可以在推荐依据中恢复隐藏的内容，或去广场看看。
+          暂时没有更多相关内容。可以在推荐依据中恢复隐藏的内容，或
+          <Link to="/plaza">去广场看看</Link>。
         </p>
       )}
       {items.length === 1 && (
@@ -189,6 +190,18 @@ export function HomeRecommendations() {
               }}
             >
               恢复隐藏的内容
+            </button>
+          )}
+          {Boolean(settings.ignoredMessages.length) && (
+            <button
+              className="text-button full-width"
+              type="button"
+              onClick={() => {
+                updateRecommendationSettings({ ignoredMessages: [] });
+                notify('被忽略的对话依据已恢复');
+              }}
+            >
+              恢复被忽略的依据
             </button>
           )}
           <p className="demo-note">演示推荐 · 未连接真实 AI · 仅在当前浏览器保存</p>
