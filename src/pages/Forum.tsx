@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate, useParams } from 'react-router-dom';
+import { Link, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import { Send, ThumbsUp } from 'lucide-react';
 import { Back, BookmarkButton, Empty, PageTitle } from '../components/Common';
 import { formatDate } from '../utils';
@@ -9,6 +9,8 @@ import type { School, Topic } from '../types';
 
 export function ThreadDetail() {
   const { id } = useParams();
+  const [params] = useSearchParams();
+  const fromHome = params.get('from') === 'home';
   const { state, addReply, toggleLike } = useStore();
   const thread = state.threads.find((item) => item.id === id);
   const [reply, setReply] = useState('');
@@ -28,7 +30,10 @@ export function ThreadDetail() {
   return (
     <div className="detail-page page-enter">
       <div className="detail-top">
-        <Back to="/plaza?tab=forum" label="问答讨论" />
+        <Back
+          to={fromHome ? '/#recommendations' : '/plaza?tab=forum'}
+          label={fromHome ? '返回首页推荐' : '问答讨论'}
+        />
         <BookmarkButton itemKey={`thread:${thread.id}`} />
       </div>
       <p className="meta">

@@ -9,6 +9,7 @@ import { NoticeDetail } from './pages/NoticeDetail';
 import { NewThread, ThreadDetail } from './pages/Forum';
 import { Agents, ToolWorkspace } from './pages/Agents';
 import { Bookmarks, Documents, History, Mine, Settings } from './pages/Mine';
+import { ResourceDetail } from './features/recommendations/ResourceDetail';
 
 export function App() {
   const Router = window.location.protocol === 'file:' ? HashRouter : BrowserRouter;
@@ -22,6 +23,7 @@ export function App() {
             <Route path="plaza" element={<Plaza />} />
             <Route path="plaza/new" element={<NewThread />} />
             <Route path="notice/:id" element={<NoticeDetail />} />
+            <Route path="resource/:id" element={<ResourceDetail />} />
             <Route path="thread/:id" element={<ThreadDetail />} />
             <Route path="agents" element={<Agents />} />
             <Route path="agents/:tool" element={<ToolWorkspace />} />

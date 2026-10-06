@@ -1,6 +1,7 @@
 import { createContext, useContext } from 'react';
 import type { StoredState, Profile, School, FileInfo, Thread, DocumentRecord } from '../types';
 import type { ResearchMatter } from '../features/matter/model';
+import type { RecommendationSettings } from '../features/recommendations/model';
 
 export interface AppStore {
   state: StoredState;
@@ -10,6 +11,7 @@ export interface AppStore {
   toggleLike: (id: string) => void;
   sendMessage: (question: string, chatId?: string, files?: FileInfo[]) => string;
   updateMatter: (chatId: string, patch: Partial<ResearchMatter>) => void;
+  updateRecommendationSettings: (patch: Partial<RecommendationSettings>) => void;
   addThread: (thread: Pick<Thread, 'title' | 'content' | 'category' | 'school'>) => string;
   addReply: (threadId: string, content: string) => void;
   addDocument: (doc: Omit<DocumentRecord, 'id' | 'date'>) => void;

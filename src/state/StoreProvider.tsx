@@ -20,6 +20,11 @@ import {
   researchAnswer,
 } from '../features/matter/model';
 import type { ResearchMatter } from '../features/matter/model';
+import {
+  isRecommendationSettings,
+  newRecommendationSettings,
+} from '../features/recommendations/model';
+import type { RecommendationSettings } from '../features/recommendations/model';
 
 const STORAGE_KEY = 'campus-prototype-v1';
 const now = () => new Date().toISOString();
@@ -33,6 +38,7 @@ const initialState: StoredState = {
   threads: initialThreads,
   documents: [],
   likedReplies: [],
+  recommendationSettings: newRecommendationSettings(),
 };
 
 function isRecord(value: unknown): value is Record<string, unknown> {
@@ -101,6 +107,17 @@ function readStorage(): StoredState {
     const restored = value as unknown as StoredState;
     return {
       ...restored,
+      threads: [
+        ...restored.threads,
+        ...initialThreads.filter(
+          (thread) =>
+            thread.id === 'research-start' &&
+            !restored.threads.some((saved) => saved.id === thread.id),
+        ),
+      ],
+      recommendationSettings: isRecommendationSettings(restored.recommendationSettings)
+        ? restored.recommendationSettings
+        : newRecommendationSettings(),
       conversations: restored.conversations.map((chat) => {
         const last = chat.messages.at(-1);
         const matter = isResearchMatter(chat.matter) ? chat.matter : undefined;
@@ -135,6 +152,7 @@ type Action =
   | { type: 'like'; id: string }
   | { type: 'message'; chatId: string; message: Message; title: string; matter?: ResearchMatter }
   | { type: 'matter'; chatId: string; patch: Partial<ResearchMatter> }
+  | { type: 'recommendationSettings'; patch: Partial<RecommendationSettings> }
   | { type: 'thread'; thread: Thread }
   | { type: 'reply'; threadId: string; content: string; profile: Profile }
   | { type: 'document'; document: DocumentRecord }
@@ -146,6 +164,16 @@ function reducer(state: StoredState, action: Action): StoredState {
   switch (action.type) {
     case 'school':
       return { ...state, selectedSchool: action.school };
+    case 'recommendationSettings': {
+      const settings = {
+        ...newRecommendationSettings(),
+        ...state.recommendationSettings,
+        ...action.patch,
+      };
+      return isRecommendationSettings(settings)
+        ? { ...state, recommendationSettings: settings }
+        : state;
+    }
     case 'profile':
       return { ...state, profile: action.profile };
     case 'bookmark':
@@ -251,7 +279,7 @@ export function StoreProvider({ children }: { children: ReactNode }) {
       chatId: key,
       title: question.slice(0, 35),
       matter,
-      message: { id: id(), role: 'user', text: question, files },
+      message: { id: id(), role: 'user', text: question, files, createdAt: now() },
     });
     replyTimers.current.set(
       key,
@@ -292,6 +320,8 @@ export function StoreProvider({ children }: { children: ReactNode }) {
         storageAvailable,
         sendMessage,
         updateMatter: (chatId, patch) => dispatch({ type: 'matter', chatId, patch }),
+        updateRecommendationSettings: (patch) =>
+          dispatch({ type: 'recommendationSettings', patch }),
         addThread,
         setSchool: (school) => dispatch({ type: 'school', school }),
         saveProfile: (profile) => {

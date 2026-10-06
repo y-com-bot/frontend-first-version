@@ -44,6 +44,7 @@ export interface Message {
   id: string;
   role: 'user' | 'assistant';
   text: string;
+  createdAt?: string;
   kind?: 'research-answer';
   files?: FileInfo[];
   references?: { label: string; href: string }[];
@@ -77,4 +78,5 @@ export interface StoredState {
   threads: Thread[];
   documents: DocumentRecord[];
   likedReplies: string[];
+  recommendationSettings?: import('./features/recommendations/model').RecommendationSettings;
 }

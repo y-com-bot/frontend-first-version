@@ -140,6 +140,26 @@ export const notices: Notice[] = [
 
 export const initialThreads: Thread[] = [
   {
+    id: 'research-start',
+    title: '第一次参与科研项目，怎么安排准备？',
+    content:
+      '想尝试参与一个校内科研项目，还在了解如何选题、组队和准备计划书。想听听同学们是怎样从一个小问题开始、再一步步完善项目的。具体申请条件我会另外核对本校通知。',
+    author: '先从一个问题开始',
+    school: '云川大学',
+    category: '学习',
+    date: '2026-10-06',
+    replies: [
+      {
+        id: 'research-reply-1',
+        author: '一步一步准备',
+        school: '南湖理工大学',
+        content:
+          '可以先把研究的问题和最小成果说清楚，列出阶段安排，再与老师讨论。这是我的准备经验，具体申报要求还是要看所在学校的正式文件。',
+        date: '2026-10-06',
+      },
+    ],
+  },
+  {
     id: 'first-internship',
     title: '大二开始找实习，会不会太早？',
     content:

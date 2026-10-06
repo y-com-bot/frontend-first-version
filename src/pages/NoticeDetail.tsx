@@ -15,6 +15,7 @@ export function NoticeDetail() {
   const location = useLocation();
   const [params] = useSearchParams();
   const from = state.conversations.find((chat) => chat.id === params.get('from') && chat.matter);
+  const fromHome = params.get('from') === 'home';
   useEffect(() => {
     if (/^#section-\d+$/.test(location.hash))
       document
@@ -38,8 +39,14 @@ export function NoticeDetail() {
     <article className="detail-page page-enter">
       <div className="detail-top">
         <Back
-          to={from ? `/chat/${from.id}#evidence` : '/plaza?tab=notices'}
-          label={from ? '返回申请核对' : '校园通知'}
+          to={
+            from
+              ? `/chat/${from.id}#evidence`
+              : fromHome
+                ? '/#recommendations'
+                : '/plaza?tab=notices'
+          }
+          label={from ? '返回申请核对' : fromHome ? '返回首页推荐' : '校园通知'}
         />
         <BookmarkButton itemKey={`notice:${notice.id}`} />
       </div>

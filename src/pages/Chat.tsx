@@ -15,8 +15,9 @@ export function Chat() {
   const end = useRef<HTMLDivElement>(null);
   useEffect(() => {
     const last = chat?.messages.at(-1);
-    const target =
-      location.hash === '#preparation'
+    const target = /^#message-[\w-]+$/.test(location.hash)
+      ? document.getElementById(location.hash.slice(1))
+      : location.hash === '#preparation'
         ? document.getElementById('preparation')
         : location.hash === '#evidence'
           ? document.getElementById('evidence')

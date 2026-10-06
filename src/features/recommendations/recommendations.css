@@ -1,0 +1,118 @@
+.home-recommendations {
+  margin-top: 23px;
+}
+.recommendation-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.recommendation-heading .section-label {
+  margin: 0;
+}
+.recommendation-heading .text-button {
+  font-size: 11px;
+  min-height: 44px;
+}
+.recommendation-context {
+  color: var(--secondary-text);
+  font-size: 11px;
+  line-height: 1.8;
+  margin: 0 0 7px;
+}
+.recommendation-item {
+  position: relative;
+  border-bottom: 1px solid var(--line);
+}
+.recommendation-link {
+  display: block;
+  position: relative;
+  padding: 13px 23px 15px 0;
+  min-height: 104px;
+}
+.recommendation-kind {
+  display: block;
+  color: var(--green);
+  font-size: 10px;
+  line-height: 1.9;
+  padding-right: 22px;
+}
+.recommendation-link h3 {
+  font-size: 14px;
+  font-weight: 500;
+  line-height: 1.8;
+  margin: 5px 0;
+}
+.recommendation-link p {
+  color: var(--secondary-text);
+  font-size: 11px;
+  line-height: 1.8;
+}
+.recommendation-arrow {
+  position: absolute;
+  right: 0;
+  bottom: 17px;
+  color: var(--green);
+}
+.recommendation-more {
+  position: absolute;
+  right: -11px;
+  top: 0;
+  color: var(--secondary-text);
+}
+.recommendation-empty {
+  color: var(--secondary-text);
+  font-size: 12px;
+  line-height: 1.9;
+  padding: 16px 0;
+}
+.recommendation-signal {
+  border-bottom: 1px solid var(--line);
+  padding: 0 0 7px;
+  margin-bottom: 17px;
+}
+.recommendation-signal h3 {
+  font-size: 15px;
+  font-weight: 500;
+  margin: 8px 0 12px;
+}
+.recommendation-signal blockquote {
+  margin: 0;
+  border-left: 2px solid #cad6c6;
+  padding-left: 12px;
+  font-size: 12px;
+  color: var(--secondary-text);
+  line-height: 1.9;
+  overflow-wrap: anywhere;
+}
+.signal-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+.signal-actions .text-button {
+  font-size: 12px;
+}
+.recommendation-no-signal {
+  background: var(--wash);
+  padding: 16px;
+  border-radius: 12px;
+  font-size: 13px;
+  line-height: 1.9;
+}
+.recommendation-scope-note {
+  font-size: 12px;
+  color: var(--secondary-text);
+  line-height: 1.9;
+  margin: 17px 0;
+}
+.recommendation-selected-title {
+  font-size: 16px;
+  font-weight: 500;
+  margin-bottom: 12px;
+  line-height: 1.8;
+}
+.resource-meta {
+  margin-top: 25px;
+}

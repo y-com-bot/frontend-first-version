@@ -35,15 +35,16 @@ export function AppShell() {
   const showComposer = location.pathname === '/' || Boolean(chatId);
   const chat = state.conversations.find((x) => x.id === chatId);
   const busy = chat?.messages.at(-1)?.role === 'user';
-  const activeTab = location.pathname.startsWith('/chat/')
-    ? '/'
-    : location.pathname.startsWith('/notice/') || location.pathname.startsWith('/thread/')
-      ? '/plaza'
-      : location.pathname.startsWith('/agents')
-        ? '/agents'
-        : location.pathname.startsWith('/mine')
-          ? '/mine'
-          : location.pathname;
+  const activeTab =
+    location.pathname.startsWith('/chat/') || location.pathname.startsWith('/resource/')
+      ? '/'
+      : location.pathname.startsWith('/notice/') || location.pathname.startsWith('/thread/')
+        ? '/plaza'
+        : location.pathname.startsWith('/agents')
+          ? '/agents'
+          : location.pathname.startsWith('/mine')
+            ? '/mine'
+            : location.pathname;
 
   const submit = () => {
     if (!draft.trim() || busy) return;
